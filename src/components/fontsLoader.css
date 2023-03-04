@@ -1,0 +1,39 @@
+@font-face {
+  font-family: 'AdelleSans';
+  src: url('/fonts/adelle-sans/adellesans-bold-webfont.eot');
+  src: url('/fonts/adelle-sans/adellesans-bold-webfont-.eot#iefix') format('embedded-opentype'),
+       url('/fonts/adelle-sans/adellesans-bold-webfont.woff2') format('woff2'),
+       url('/fonts/adelle-sans/adellesans-bold-webfont.woff') format('woff'),
+       url('/fonts/adelle-sans/adellesans-bold-webfont.ttf') format('truetype');
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: 'AdelleSans';
+  src: url('/fonts/adelle-sans/adellesans-extrabold-webfont.eot');
+  src: url('/fonts/adelle-sans/adellesans-extrabold-webfont-.eot#iefix') format('embedded-opentype'),
+       url('/fonts/adelle-sans/adellesans-extrabold-webfont.woff2') format('woff2'),
+       url('/fonts/adelle-sans/adellesans-extrabold-webfont.woff') format('woff'),
+       url('/fonts/adelle-sans/adellesans-extrabold-webfont.ttf') format('truetype');
+  font-weight: 800;
+}
+
+@font-face {
+  font-family: 'AdelleSans';
+  src: url('/fonts/adelle-sans/adellesans-regular-webfont.eot');
+  src: url('/fonts/adelle-sans/adellesans-regular-webfont-.eot#iefix') format('embedded-opentype'),
+       url('/fonts/adelle-sans/adellesans-regular-webfont.woff2') format('woff2'),
+       url('/fonts/adelle-sans/adellesans-regular-webfont.woff') format('woff'),
+       url('/fonts/adelle-sans/adellesans-regular-webfont.ttf') format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'AdelleSans';
+  src: url('/fonts/adelle-sans/adellesans-semibold-webfont.eot');
+  src: url('/fonts/adelle-sans/adellesans-semibold-webfont-.eot#iefix') format('embedded-opentype'),
+       url('/fonts/adelle-sans/adellesans-semibold-webfont.woff2') format('woff2'),
+       url('/fonts/adelle-sans/adellesans-semibold-webfont.woff') format('woff'),
+       url('/fonts/adelle-sans/adellesans-semibold-webfont.ttf') format('truetype');
+  font-weight: 600;
+}
