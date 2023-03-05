@@ -3,8 +3,6 @@ import { Duration } from 'dayjs/plugin/duration';
 
 import { Day, Interval } from '~/types/logTypes';
 
-import fixRange from './fixRange';
-
 export const showSumOfDurations = (duration: Duration): string => {
   const minutes = +duration.asMinutes().toFixed(0);
   const minutesString = minutes! % 60;

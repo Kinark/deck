@@ -46,7 +46,6 @@ const Details = () => {
     const refIndex = plainLogs.findIndex((log) => log.id === id);
     const lastSevenDays = plainLogs.slice(Math.max(0, refIndex - 6), refIndex + 1);
     return sumDurationOfDays(lastSevenDays);
-    return "lol"
   };
 
   return (
