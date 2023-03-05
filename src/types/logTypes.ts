@@ -1,3 +1,5 @@
+import { Dayjs } from "dayjs";
+
 export interface Ruleset {
   cycle: string;
   jurisdiction?: string;
@@ -80,4 +82,14 @@ export interface Pagination {
 export interface RootObject {
   data: Log[];
   pagination: Pagination;
+}
+
+export interface Day {
+  id: string;
+  logs: Interval[];
+}
+
+export interface Interval {
+  startTime: Dayjs;
+  endTime: Dayjs;
 }

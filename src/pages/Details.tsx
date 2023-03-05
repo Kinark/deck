@@ -15,8 +15,8 @@ import { navBarSelectedUserIdAtom } from '~/components/NavBar/atoms';
 
 import { eldLogAtom } from '~/atoms/eldLog';
 import { Log } from '~/types/logTypes';
-import groupDatesByWeek from '~/utils/groupLogsByWeek';
-import sumDurationOfLogGroup from '~/utils/sumDurationOfLogGroup';
+import sumDurationOfDays, {showSumOfDurations} from '~/utils/sumDurationOfDays';
+import groupLogsByWeekAndDays from '~/utils/groupLogsByWeekAndDays';
 
 dayjs.extend(weekOfYear);
 
@@ -29,25 +29,24 @@ const Details = () => {
 
   useEffect(() => {
     if (!driverId) return navigate('/');
-    const driverLogs = eldLog.filter((log) => log.driver.id === driverId);
+    const newDriverLogs = eldLog.filter((log) => log.driver.id === driverId);
     setnavBarSelectedUserId(driverId);
-    setDriverLogs(driverLogs);
+    setDriverLogs(newDriverLogs);
   }, [driverId]);
 
   const groupedLogs = useMemo(() => {
-    return groupDatesByWeek(driverLogs);
+    return groupLogsByWeekAndDays(driverLogs);
   }, [driverLogs]);
 
-  const sortedLogs = useMemo(() => {
-    return groupedLogs.reduce((acc, curr) => {
-      return [...acc, ...curr];
-    }, [] as Log[]);
+  const plainLogs = useMemo(() => {
+    return groupedLogs.flat()
   }, [groupedLogs]);
 
   const getSumOfTimeOfLastSevenDays = (id: string) => {
-    const refIndex = sortedLogs.findIndex((log) => log.id === id);
-    const lastSevenDays = sortedLogs.slice(Math.max(0, refIndex - 7), refIndex + 1);
-    return sumDurationOfLogGroup(lastSevenDays);
+    const refIndex = plainLogs.findIndex((log) => log.id === id);
+    const lastSevenDays = plainLogs.slice(Math.max(0, refIndex - 6), refIndex + 1);
+    return sumDurationOfDays(lastSevenDays);
+    return "lol"
   };
 
   return (
@@ -63,22 +62,23 @@ const Details = () => {
             //   </CircularButton>
             // }
           >
-            {groupedLogs.reverse().map((logGroup, i) => (
+            {groupedLogs.reverse().map((days, i) => {
+              const firstLog = days[0].logs[0];
+              return (
               <CollapsibleSection
                 key={i}
-                title={`Week ${dayjs(logGroup[0].startTime).week()} of ${dayjs(logGroup[0].startTime).year()}`}
-                subTitle={`Total: ${sumDurationOfLogGroup(logGroup)}`}
+                title={`Week ${dayjs(firstLog.startTime).week()} of ${dayjs(firstLog.startTime).year()}`}
+                subTitle={`Total: ${showSumOfDurations(sumDurationOfDays(days))}`}
               >
-                {logGroup.reverse().map((log) => (
+                {days.reverse().map((day) => (
                   <WorkdayEntry
-                    key={log.id}
-                    sumOfLastSeven={getSumOfTimeOfLastSevenDays(log.id)!}
-                    startedAt={log.startTime}
-                    endedAt={log.endTime}
+                    key={day.id}
+                    logs={day.logs}
+                    sumOfLastSeven={getSumOfTimeOfLastSevenDays(day.id)}
                   />
                 ))}
               </CollapsibleSection>
-            ))}
+            )})}
           </FluidCard>
         </Column>
         {/* <Column>

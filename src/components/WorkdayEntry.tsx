@@ -1,62 +1,128 @@
 import styled from 'styled-components';
 import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
-import { TbClockPlay, TbClockStop, TbAlertTriangleFilled } from 'react-icons/tb';
+import duration, { Duration } from 'dayjs/plugin/duration';
+import { nanoid } from 'nanoid';
+import {
+  TbClockPlay,
+  TbClockStop,
+  TbAlertTriangleFilled,
+  TbClipboardCheck,
+  TbMoodSadDizzy,
+  TbInfoCircleFilled,
+} from 'react-icons/tb';
+import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
+
+import { Interval } from '~/types/logTypes';
+import { showSumOfDurations, sumDurationOfLogs } from '~/utils/sumDurationOfDays';
 
 dayjs.extend(duration);
 
-import fixRange from '~/utils/fixRange';
+const OVERWORKED_THRESHOLD = 70;
+const OVERWORKED_WARNING_PERCENTAGE = 80;
+
+const overworkedThresholdInSeconds = OVERWORKED_THRESHOLD * 60 * 60;
 
 interface WorkdayEntryProps {
-  startedAt: string;
-  endedAt: string;
-  sumOfLastSeven: string;
+  logs: Interval[];
+  sumOfLastSeven: Duration;
 }
 
-const WorkdayEntry = ({ startedAt: _startedAt, endedAt: _endedAt, sumOfLastSeven }: WorkdayEntryProps) => {
-  const [startedAt, endedAt] = fixRange(_startedAt, _endedAt);
+const WorkdayEntry = ({ logs, sumOfLastSeven }: WorkdayEntryProps) => {
+  const firstEntry = logs[0].startTime;
 
+  const isOverworked = sumOfLastSeven.asSeconds() > overworkedThresholdInSeconds;
+  const overworkedPercentage = Math.round((sumOfLastSeven.asSeconds() / overworkedThresholdInSeconds) * 100);
+  const overworkedWarning = overworkedPercentage > OVERWORKED_WARNING_PERCENTAGE;
   return (
     <Wrapper>
       <Card>
         <WeekDayTag>
-          <span>{startedAt.format('ddd')}</span>
+          <span>{firstEntry.format('ddd')}</span>
         </WeekDayTag>
         <DateWrapper>
-          <div>{startedAt.format('DD')}</div>
-          <div>{startedAt.format('MMM')}</div>
+          <div>{firstEntry.format('DD')}</div>
+          <div>{firstEntry.format('MMM')}</div>
         </DateWrapper>
+        <TimeItem
+          label="Overwork"
+          tooltip={
+            overworkedWarning
+              ? isOverworked
+                ? `You exceeded the limit of ${OVERWORKED_THRESHOLD} working hours in the last 7 days.`
+                : `You worked ${overworkedPercentage}% of the allowed limit (${OVERWORKED_THRESHOLD} hours) in the last 7 days`
+              : undefined
+          }
+          warning={overworkedWarning}
+          icon={
+            overworkedWarning ? isOverworked ? <TbMoodSadDizzy /> : <TbAlertTriangleFilled /> : <TbClipboardCheck />
+          }
+          time={showSumOfDurations(sumOfLastSeven)}
+        />
         <div>
-          Last seven
-          <IconTime>
-            <TbAlertTriangleFilled />
-            {sumOfLastSeven}
-          </IconTime>
+          {logs.map(({ startTime }) => (
+            <TimeItem
+              key={startTime.millisecond()}
+              label="Started at"
+              icon={<TbClockPlay />}
+              time={startTime.format('HH:mm')}
+            />
+          ))}
         </div>
         <div>
-          Started at
-          <IconTime>
-            <TbClockPlay />
-            {startedAt.format('HH:mm')}
-          </IconTime>
-        </div>
-        <div>
-          Ended at
-          <IconTime>
-            <TbClockStop />
-            {endedAt.format('HH:mm')}
-          </IconTime>
+          {logs.map(({ endTime }) => (
+            <TimeItem
+              key={endTime.millisecond()}
+              label="Ended at"
+              icon={<TbClockStop />}
+              time={endTime.format('HH:mm')}
+            />
+          ))}
         </div>
       </Card>
       <div>
         Total
-        <IconTime>{dayjs.duration(endedAt.diff(startedAt)).format('HH:mm')}</IconTime>
+        <IconTime>{showSumOfDurations(sumDurationOfLogs(logs))}</IconTime>
       </div>
     </Wrapper>
   );
 };
 
 export default WorkdayEntry;
+
+const TimeItem = ({
+  warning,
+  label,
+  icon,
+  time,
+  tooltip,
+}: {
+  warning?: boolean;
+  label: string;
+  icon: React.ReactNode;
+  time: string;
+  tooltip?: string;
+}) => {
+  const id = nanoid();
+  return (
+    <TimeItemWrapper warning={warning}>
+      <Tooltip id={id} />
+      <TooltipWrapper>
+        {label} {!!tooltip && <TbInfoCircleFilled data-tooltip-id={id} data-tooltip-content={tooltip} />}
+      </TooltipWrapper>
+      <IconTime>
+        {icon}
+        {time}
+      </IconTime>
+    </TimeItemWrapper>
+  );
+};
+
+const TooltipWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
 
 const Wrapper = styled.div`
   display: flex;
@@ -124,4 +190,11 @@ const IconTime = styled.div`
   font-weight: 400;
   color: ${({ theme }) => theme.colors.secondary};
   font-size: ${({ theme }) => theme.font.sizes.title};
+`;
+
+const TimeItemWrapper = styled.div<{ warning?: boolean }>`
+  color: ${({ theme, warning }) => (warning ? theme.colors.error : 'inherit')};
+  ${IconTime} {
+    color: ${({ theme, warning }) => (warning ? theme.colors.error : theme.colors.secondary)};
+  }
 `;
